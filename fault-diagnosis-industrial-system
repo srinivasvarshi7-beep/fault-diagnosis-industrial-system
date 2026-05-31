@@ -1,0 +1,73 @@
+# Import Libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Create Dataset
+data = {
+    'Temperature':[45,50,60,65,55,70,48,75,52,68,46,72,53,67,49,74],
+    'Vibration':[2.1,2.5,3.5,4.0,2.8,4.5,2.2,5.0,2.7,4.2,2.0,4.8,2.9,4.1,2.3,5.1],
+    'Pressure':[30,32,35,38,33,40,31,42,34,39,30,41,34,38,31,43],
+    'Humidity':[55,58,60,65,57,70,56,72,59,68,54,71,60,67,55,73],
+    'Fault':[0,0,1,1,0,1,0,1,0,1,0,1,0,1,0,1]
+}
+
+df = pd.DataFrame(data)
+
+print("Dataset:")
+print(df.head())
+
+# Visualization
+sns.pairplot(df, hue='Fault')
+plt.show()
+
+# Features and Target
+X = df.drop('Fault', axis=1)
+y = df['Fault']
+
+# Split Data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train Model
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Predict
+y_pred = model.predict(X_test)
+
+# Accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print("\nAccuracy:", accuracy)
+
+# Classification Report
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+# Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure(figsize=(5,4))
+sns.heatmap(cm, annot=True, fmt='d')
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
+
+# Test New Machine Data
+sample_data = pd.DataFrame(
+    [[69, 4.4, 39, 69]],
+    columns=['Temperature', 'Vibration', 'Pressure', 'Humidity']
+)
+
+prediction = model.predict(sample_data)
+
+if prediction[0] == 1:
+    print("\nResult: Fault Detected")
+else:
+    print("\nResult: System Operating Normally")
